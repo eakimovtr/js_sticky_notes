@@ -1,63 +1,82 @@
-"use strict";
-const container = document.querySelector("#app");
-const addBtn = document.querySelector(".add-note");
-const notes = [];
-let noteCount = 0;
-window.onload = function () {
-    const notesStored = loadFromStorage();
+const container = <HTMLDivElement>document.querySelector("#app")
+const addBtn = <HTMLButtonElement>document.querySelector(".add-note")
+
+interface Note {
+    id: number;
+    content: string;
+}
+
+const notes: Note[] = []
+let noteCount: number = 0;
+
+window.onload = function(): void {
+    const notesStored: Note[] = loadFromStorage();
     noteCount = notesStored[notesStored.length - 1].id;
     for (const note of notesStored) {
         notes.push(note);
         displayNote(note);
     }
-};
-function loadFromStorage() {
-    const localRawNotes = JSON.parse(localStorage.getItem("notes"));
+}
+
+function loadFromStorage(): Note[] {
+    const localRawNotes = <Object[]>JSON.parse(localStorage.getItem("notes"));
     if (!localRawNotes) {
         return [];
     }
-    return localRawNotes;
+    return <Note[]>localRawNotes;
 }
-function displayNote(note) {
-    const noteElement = createNoteElement(note);
+
+function displayNote(note: Note): void {
+    const noteElement: HTMLElement = createNoteElement(note);
     container.insertBefore(noteElement, addBtn);
 }
-function createNoteElement(note) {
-    const element = document.createElement("textarea");
+
+function createNoteElement(note: Note): HTMLElement {
+    const element: HTMLTextAreaElement = document.createElement("textarea");
     element.classList.add("note");
     element.id = String(note.id);
     element.value = note.content;
     element.placeholder = "Type here...";
+
     element.addEventListener("change", (ev) => onUpdate(note, ev));
+
     element.addEventListener("dblclick", () => {
         const deleteConfirm = confirm("Are you sure?");
         if (deleteConfirm) {
-            onDelete(note);
+            onDelete(note)
         }
-    });
+    })
+
     return element;
 }
-function onUpdate(note, ev) {
-    const value = ev.target.value;
+
+function onUpdate(note: Note, ev: Event): Note {
+    const value: string = (ev.target as HTMLTextAreaElement).value;
     note.content = value;
+
     updateNote(note);
+
     return note;
 }
-function onDelete(note) {
+
+function onDelete(note: Note): Note {
     return deleteNote(note);
 }
-function createNewNote() {
-    const note = { id: ++noteCount, content: "" };
+
+function createNewNote(): Note {
+    const note: Note = {id: ++noteCount,content: ""};
     saveNote(note);
     displayNote(note);
     return note;
 }
-function saveNote(note) {
+
+function saveNote(note: Note): Note {
     notes.push(note);
     localStorage.setItem("notes", JSON.stringify(notes));
     return note;
 }
-function deleteNote(deleteNote) {
+
+function deleteNote(deleteNote: Note): Note {
     const res = notes.splice(notes.findIndex(note => note.id == deleteNote.id))[0];
     localStorage.setItem("notes", JSON.stringify(notes));
     for (let i = 0; i < container.children.length; i++) {
@@ -68,7 +87,8 @@ function deleteNote(deleteNote) {
     }
     return res;
 }
-function updateNote(newNote) {
+
+function updateNote(newNote: Note): Note {
     for (const note of notes) {
         if (newNote.id == note.id) {
             note.content = newNote.content;
@@ -77,4 +97,5 @@ function updateNote(newNote) {
         }
     }
 }
-addBtn.addEventListener("click", () => createNewNote());
+
+addBtn.addEventListener("click", () => createNewNote())
